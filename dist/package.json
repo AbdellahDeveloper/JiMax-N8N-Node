@@ -1,0 +1,63 @@
+{
+    "name": "n8n-nodes-jimax-llm",
+    "version": "0.1.0",
+    "description": "n8n nodes for LLM interaction using Vercel AI SDK",
+    "license": "MIT",
+    "homepage": "",
+    "keywords": [
+        "n8n-community-node-package"
+    ],
+    "author": {
+        "name": "JiMax",
+        "email": ""
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/AbdellahDeveloper/n8n-nodes-jimax-llm.git"
+    },
+    "scripts": {
+        "build": "tsc",
+        "build:watch": "tsc --watch",
+        "dev": "n8n-node dev",
+        "lint": "n8n-node lint",
+        "lint:fix": "n8n-node lint --fix",
+        "release": "n8n-node release",
+        "prepublishOnly": "n8n-node prerelease"
+    },
+    "files": [
+        "dist"
+    ],
+    "n8n": {
+        "n8nNodesApiVersion": 1,
+        "strict": true,
+        "credentials": [
+            "dist/credentials/OpenAiSdkApi.credentials.js",
+            "dist/credentials/GoogleSdkApi.credentials.js",
+            "dist/credentials/AnthropicSdkApi.credentials.js",
+            "dist/credentials/OpenAiCompatibleSdkApi.credentials.js"
+        ],
+        "nodes": [
+            "dist/nodes/JiMaxLLM/JiMaxTextLLM.node.js",
+            "dist/nodes/JiMaxLLM/JiMaxObjectLLM.node.js",
+            "dist/nodes/JiMaxLLM/JiMaxObjectToolLLM.node.js"
+        ]
+    },
+    "devDependencies": {
+        "@n8n/node-cli": "*",
+        "eslint": "9.39.4",
+        "prettier": "3.8.3",
+        "release-it": "20.0.1",
+        "typescript": "^6.0.3"
+    },
+    "peerDependencies": {
+        "n8n-workflow": "*"
+    },
+    "dependencies": {
+        "@ai-sdk/anthropic": "^3.0.74",
+        "@ai-sdk/google": "^3.0.67",
+        "@ai-sdk/openai": "^3.0.58",
+        "@ai-sdk/openai-compatible": "^2.0.45",
+        "ai": "^6.0.174",
+        "zod": "^4.4.2"
+    }
+}
