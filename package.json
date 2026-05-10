@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-jimax-llm",
-	"version": "0.1.0",
+	"version": "1.1.0",
 	"description": "n8n nodes for LLM interaction using Vercel AI SDK",
 	"license": "MIT",
 	"homepage": "",
@@ -21,8 +21,7 @@
 		"dev": "n8n-node dev",
 		"lint": "n8n-node lint",
 		"lint:fix": "n8n-node lint --fix",
-		"release": "n8n-node release",
-		"prepublishOnly": "n8n-node prerelease"
+		"release": "n8n-node release"
 	},
 	"files": [
 		"dist"
@@ -34,12 +33,14 @@
 			"dist/credentials/OpenAiSdkApi.credentials.js",
 			"dist/credentials/GoogleSdkApi.credentials.js",
 			"dist/credentials/AnthropicSdkApi.credentials.js",
-			"dist/credentials/OpenAiCompatibleSdkApi.credentials.js"
+			"dist/credentials/OpenAiCompatibleSdkApi.credentials.js",
+			"dist/credentials/UpstashSearchApi.credentials.js"
 		],
 		"nodes": [
 			"dist/nodes/JiMaxLLM/JiMaxTextLLM.node.js",
 			"dist/nodes/JiMaxLLM/JiMaxObjectLLM.node.js",
-			"dist/nodes/JiMaxLLM/JiMaxObjectToolLLM.node.js"
+			"dist/nodes/JiMaxLLM/JiMaxObjectToolLLM.node.js",
+			"dist/nodes/UpstashSearch/UpstashSearch.node.js"
 		]
 	},
 	"devDependencies": {
@@ -57,6 +58,7 @@
 		"@ai-sdk/google": "^3.0.67",
 		"@ai-sdk/openai": "^3.0.58",
 		"@ai-sdk/openai-compatible": "^2.0.45",
+		"@upstash/search": "^0.1.7",
 		"ai": "^6.0.174",
 		"zod": "^4.4.2"
 	}

@@ -1,0 +1,800 @@
+{
+  "name": "Whatsapp Bot Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1WSBNsk9kWlBqszc9mlgXqULF6AQECJ3ciQ33ysNy9xc",
+          "mode": "list",
+          "cachedResultName": "Special",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WSBNsk9kWlBqszc9mlgXqULF6AQECJ3ciQ33ysNy9xc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1282920192,
+          "mode": "list",
+          "cachedResultName": "Spam",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WSBNsk9kWlBqszc9mlgXqULF6AQECJ3ciQ33ysNy9xc/edit#gid=1282920192"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Phone Number",
+              "lookupValue": "={{ $('Webhook').item.json.body.chat_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "85dbc49a-2bc4-4e07-a8e2-ff553806f073",
+      "name": "Check Existing Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -2080,
+        -144
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tQhepV0r7BjgQ9Kp",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a586660c-067b-427a-a7ef-a97644657a28",
+                    "leftValue": "={{ $json.Name }}",
+                    "rightValue": "QUALIFIED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "APPROVED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4a191053-649e-46e3-96c3-48e233f25b89",
+      "name": "Routing Logic",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1840,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://app.whatchimp.com/api/v1/whatsapp/send",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "apiToken",
+              "value": "20022|gpwcpcnvJft3O2cGG55O6kGMvPgoq13ZJ2TF9Prsc105f0ff"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.reply }}"
+            },
+            {
+              "name": "phone_number",
+              "value": "={{ $('Webhook').item.json.body.chat_id }}"
+            },
+            {
+              "name": "phone_number_id",
+              "value": "1173642789154446"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e2dca41e-68bd-4b0d-ae93-ef4b75d45721",
+      "name": "Send WhatsApp Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "f894bf02-2e80-4c71-bedf-c7e757fb9686",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2368,
+        -144
+      ],
+      "id": "18b40efb-fd68-4528-87a6-e5944e6881ba",
+      "name": "Webhook",
+      "webhookId": "f894bf02-2e80-4c71-bedf-c7e757fb9686"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b150eeb3-7bca-46b8-b33a-aae6ebdd0a4b",
+                    "leftValue": "={{ $('Webhook').item.json.body.user_message.type }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "isAudio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "dec2b661-9b8b-4cd3-bccb-afe19a526b2b",
+                    "leftValue": "={{ $('Webhook').item.json.body.user_message.type }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "NotAudio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd3896ea-bc12-4c65-89de-34f51907d844",
+      "name": "Routing Logic1",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1328,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b150eeb3-7bca-46b8-b33a-aae6ebdd0a4b",
+                    "leftValue": "={{ $('Edit Fields').item.json.category }}",
+                    "rightValue": "LEAD",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Qualified Lead"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "dec2b661-9b8b-4cd3-bccb-afe19a526b2b",
+                    "leftValue": "={{ $('Edit Fields').item.json.category }}",
+                    "rightValue": "PENDING",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Conversation Loop"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4be3b3bf-a824-4d80-9754-7ffeb66fe081",
+                    "leftValue": "={{ $('Edit Fields').item.json.category }}",
+                    "rightValue": "REJECT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Job Seeker"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f1b94ec1-0f6b-4544-9a77-51cae0444922",
+      "name": "Routing Logic2",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        512,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WSBNsk9kWlBqszc9mlgXqULF6AQECJ3ciQ33ysNy9xc",
+          "mode": "list",
+          "cachedResultName": "Special",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WSBNsk9kWlBqszc9mlgXqULF6AQECJ3ciQ33ysNy9xc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1282920192,
+          "mode": "list",
+          "cachedResultName": "Spam",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WSBNsk9kWlBqszc9mlgXqULF6AQECJ3ciQ33ysNy9xc/edit#gid=1282920192"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Time": "={{ $now.toFormat('HH:mm:ss') }}",
+            "Date": "={{ $now.toFormat('dd/MM/yyyy') }}",
+            "Phone Number": "={{ $('Webhook').item.json.body.chat_id }}",
+            "Name": "={{ $('Webhook').item.json.body.first_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "04a1784a-dc4b-48b8-9bb6-c4a52f0b22ad",
+      "name": "Log to Google Sheets2",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        800,
+        -32
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tQhepV0r7BjgQ9Kp",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "97e2223a-68c3-4849-b44d-b68d6fc4de93",
+              "name": "category",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "195b97e0-2385-41b8-87ce-054a0273cff6",
+              "name": "restaurant_name",
+              "value": "={{ $json.restaurant_name }}",
+              "type": "string"
+            },
+            {
+              "id": "a464e37c-a90f-4733-aacf-845d8f6ee266",
+              "name": "reply",
+              "value": "={{ $json.reply }}",
+              "type": "string"
+            },
+            {
+              "id": "8a2e49f1-1805-43f8-8039-6e0edf54ce9f",
+              "name": "summary",
+              "value": "={{ $json.summary }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -384,
+        -144
+      ],
+      "id": "dad265e0-8f25-43b2-9a47-02bd52c4a8e5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "provider": "google",
+        "modelId": "gemini-2.5-flash",
+        "prompt": "=LEAD NAME:  {{ $json['Lead Name'] }}",
+        "audioUrl": "={{ $('Webhook').item.json.body.user_message.url }}",
+        "zodSchema": "z.object({\nuser_message:z.string(),\n  category: z.enum([\"LEAD\",\"REJECT\",\"PENDING\"]),\n  restaurant_name: z.string(),\n  reply: z.string(),\nsummary: z.string()\n})",
+        "systemPrompt": "\nIdentity: You are the Senior AI Business Advisor for JiMax Digital, representing Othmane. We specialize in AI Booking Chatbots and QR Review Systems for the elite hospitality sector f Marrakesh.\nLocation: Le Marivaux Marrakech, Guéliz —  (share ONLY if user explicitly asks for it):\nhttps://www.google.com/maps/place/Le+Marivaux+Marrakech/@31.6380239,-8.0209682,17z/data=!4m14!1m7!3m6!1s0xdafeffcb8172627:0x1c08a8e2d76a9375!2sLe+Marivaux+Marrakech!8m2!3d31.6380194!4d-8.0183933!16s%2Fg%2F11v1910jq8!3m5!1s0xdafeffcb8172627:0x1c08a8e2d76a9375!8m2!3d31.6380194!4d-8.0183933!16s%2Fg%2F11v1910jq8?entry=ttu&g_ep=EgoyMDI2MDUwMi4wIKXMDSoASAFQAw%3D%3D\nPersonality: Professional, result-oriented, weld nass — savvy business partner men Guéliz. Culturally fluid, sophisticated, direct.\nLanguage Logic (Crucial):\n\nDefault: Always respond in Darija marocain (arabic script or latin), or a Darija French mix — unless the user writes in pure French, English, Spanish, or another non-Darija language.\nMirroring: Pure French → French. English → English. Spanish → Spanish. Darija French mix → mirror that mix. Never use hyphens between merged words (write \"l maghrib\", \"l hôtel\", \"f dak l waqt\" — never \"l-maghrib\").\nTone: Natural, high-level business tone. Never textbook, never generic. Match formality level while staying professional.\n\nMission:\n\nPENDING: Conversation just started or role/restaurant name not yet confirmed → ask one strategic question at a time.\nLEAD: Confirmed restaurant owner or manager + restaurant name identified.\nREJECT: Job seekers, interns, spam → polite, firm, end conversation. We are not hiring.\n\nPricing Rule: NEVER give prices. Pricing is only discussed in a 1-on-1 discovery meeting.\nMeeting Rule: All discovery meetings are held online. If a lead wants to meet → propose an online meeting. Never suggest a physical visit. Only share the office location link if the user explicitly asks for it.\nResponse Rule: Keep every reply short and sharp. No long paragraphs. Humans don't read walls of text.\nOutput — return this exact JSON:\njson{\n  \"category\": \"LEAD | REJECT | PENDING\",\n  \"restaurant_name\": \"Name or Unknown\",\n  \"reply\": \"Your response mirroring user language/dialect\",\n  \"summary\": \"One sentence state summary\"\n}",
+        "useMemory": true,
+        "sessionId": "={{ $('Webhook').item.json.body.chat_id }}"
+      },
+      "type": "n8n-nodes-jimax-llm.jiMaxObjectLLM",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        -256
+      ],
+      "id": "1fa06c2d-990c-455b-b803-f419b36131b7",
+      "name": "JiMax Object LLM",
+      "credentials": {
+        "googleSdkApi": {
+          "id": "AFATMxRY5oaUB4Kv",
+          "name": "Google (Gemini) SDK account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "provider": "google",
+        "modelId": "gemini-2.5-flash",
+        "prompt": "=LEAD NAME:  {{ $json['Lead Name'] }}\nPROMPT:\n{{ $('Webhook').item.json.body.user_message }}",
+        "audioUrl": "=",
+        "zodSchema": "z.object({\n  category: z.enum([\"LEAD\",\"REJECT\",\"PENDING\"]),\n  restaurant_name: z.string(),\n  reply: z.string(),\nsummary: z.string()\n})",
+        "systemPrompt": "\nIdentity: You are the Senior AI Business Advisor for JiMax Digital, representing Othmane. We specialize in AI Booking Chatbots and QR Review Systems for the elite hospitality sector f Marrakesh.\nLocation: Le Marivaux Marrakech, Guéliz —  (share ONLY if user explicitly asks for it):\nhttps://www.google.com/maps/place/Le+Marivaux+Marrakech/@31.6380239,-8.0209682,17z/data=!4m14!1m7!3m6!1s0xdafeffcb8172627:0x1c08a8e2d76a9375!2sLe+Marivaux+Marrakech!8m2!3d31.6380194!4d-8.0183933!16s%2Fg%2F11v1910jq8!3m5!1s0xdafeffcb8172627:0x1c08a8e2d76a9375!8m2!3d31.6380194!4d-8.0183933!16s%2Fg%2F11v1910jq8?entry=ttu&g_ep=EgoyMDI2MDUwMi4wIKXMDSoASAFQAw%3D%3D\nPersonality: Professional, result-oriented, weld nass — savvy business partner men Guéliz. Culturally fluid, sophisticated, direct.\nLanguage Logic (Crucial):\n\nDefault: Always respond in Darija marocain (arabic script or latin), or a Darija French mix — unless the user writes in pure French, English, Spanish, or another non-Darija language.\nMirroring: Pure French → French. English → English. Spanish → Spanish. Darija French mix → mirror that mix. Never use hyphens between merged words (write \"l maghrib\", \"l hôtel\", \"f dak l waqt\" — never \"l-maghrib\").\nTone: Natural, high-level business tone. Never textbook, never generic. Match formality level while staying professional.\n\nMission:\n\nPENDING: Conversation just started or role/restaurant name not yet confirmed → ask one strategic question at a time.\nLEAD: Confirmed restaurant owner or manager + restaurant name identified.\nREJECT: Job seekers, interns, spam → polite, firm, end conversation. We are not hiring.\n\nPricing Rule: NEVER give prices. Pricing is only discussed in a 1-on-1 discovery meeting.\nMeeting Rule: All discovery meetings are held online. If a lead wants to meet → propose an online meeting. Never suggest a physical visit. Only share the office location link if the user explicitly asks for it.\nResponse Rule: Keep every reply short and sharp. No long paragraphs. Humans don't read walls of text.\nOutput — return this exact JSON:\njson{\n  \"category\": \"LEAD | REJECT | PENDING\",\n  \"restaurant_name\": \"Name or Unknown\",\n  \"reply\": \"Your response mirroring user language/dialect\",\n  \"summary\": \"One sentence state summary\"\n}",
+        "useMemory": true,
+        "sessionId": "={{ $('Webhook').item.json.body.chat_id }}"
+      },
+      "type": "n8n-nodes-jimax-llm.jiMaxObjectLLM",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        -16
+      ],
+      "id": "e654304c-3f7c-4a80-9bd1-124f6226fcb1",
+      "name": "JiMax Object LLM1",
+      "credentials": {
+        "googleSdkApi": {
+          "id": "AFATMxRY5oaUB4Kv",
+          "name": "Google (Gemini) SDK account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -752,
+        -144
+      ],
+      "id": "2e813e9a-33a5-410f-9755-e694113688c6",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/1173642789154446/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAAVtJZBZAUZAd0BRfIlColzflDG84TnbTaNXfOOhOrIMhNNhom5jOyfnWZBeqqWg3vXPkFHfQHs54DjOgTamAxTEK7JsjloVuxKXelHd2X3eyVgZCxUSzPdAkPNlXsqWCCMzsh79f7Ji7jfdk8qHHRr4VHSsZBJdgmZCeeLeGtgu1qf8Lej7ZBIOUa1CF1IDZB5ZCtkixauF2zhDdbyu5tNoJbe4ps85ZA8xS7y5VxzFSwJ"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"status\": \"read\",\n  \"message_id\": \"{{ $('Webhook').item.json.body.wa_message_id }}\",\n  \"typing_indicator\": {\n    \"type\": \"text\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1568,
+        -144
+      ],
+      "id": "ff044a01-b966-40ae-9e0b-e307064911f0",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WSBNsk9kWlBqszc9mlgXqULF6AQECJ3ciQ33ysNy9xc",
+          "mode": "list",
+          "cachedResultName": "Special",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WSBNsk9kWlBqszc9mlgXqULF6AQECJ3ciQ33ysNy9xc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WSBNsk9kWlBqszc9mlgXqULF6AQECJ3ciQ33ysNy9xc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Time": "={{ $now.toFormat('HH:mm:ss') }}",
+            "Date": "={{ $now.toFormat('dd/MM/yyyy') }}",
+            "Phone Number": "={{ $('Webhook').item.json.body.chat_id }}",
+            "Lead Name": "={{ $('Webhook').item.json.body.first_name }}",
+            "Restaurant Name": "={{ $('Merge').item.json.restaurant_name }}",
+            "Bot Reply": "={{ $('Merge').item.json.reply }}",
+            "Status": "={{ $('Merge').item.json.category }}",
+            "Summary": "={{ $('Merge').item.json.summary }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lead Name",
+              "displayName": "Lead Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Restaurant Name",
+              "displayName": "Restaurant Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Bot Reply",
+              "displayName": "Bot Reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "17cf076d-e671-43a6-bf8a-ee129cd926e5",
+      "name": "Log to Google Sheets3",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        800,
+        -240
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tQhepV0r7BjgQ9Kp",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Check Existing Lead": {
+      "main": [
+        [
+          {
+            "node": "Routing Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Routing Logic": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Existing Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Routing Logic2": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [
+          {
+            "node": "Log to Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp Reply": {
+      "main": [
+        [
+          {
+            "node": "Routing Logic2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Routing Logic1": {
+      "main": [
+        [
+          {
+            "node": "JiMax Object LLM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "JiMax Object LLM1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JiMax Object LLM": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JiMax Object LLM1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Routing Logic1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "396e419b-6030-40e6-bb42-5a3cf3f0c54e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "28bb61c2270cb9ef2c15fdaa8d50c80000ece5f8c93ab0253fd7b0d1bbba3f26"
+  },
+  "id": "RGW1pbcuotcXETsw",
+  "tags": []
+}
