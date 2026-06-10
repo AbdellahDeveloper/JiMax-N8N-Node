@@ -49,7 +49,7 @@ class JiMaxObjectLLM {
     constructor() {
         this.description = {
             displayName: 'JiMax Object LLM',
-            name: 'jiMaxObjectLLM',
+            name: 'jiMaxObjectLlm',
             icon: 'fa:robot',
             group: ['transform'],
             version: 1,
@@ -189,6 +189,7 @@ class JiMaxObjectLLM {
                     description: 'If enabled, the memory for this Session ID will be deleted during this run',
                 },
             ],
+            usableAsTool: true,
         };
     }
     async execute() {

@@ -1,6 +1,6 @@
 {
     "name": "n8n-nodes-jimax-llm",
-    "version": "1.1.0",
+    "version": "1.0.2",
     "description": "n8n nodes for LLM interaction using Vercel AI SDK",
     "license": "MIT",
     "homepage": "",
@@ -24,11 +24,12 @@
         "release": "n8n-node release"
     },
     "files": [
-        "dist"
+        "dist",
+        "icons"
     ],
     "n8n": {
         "n8nNodesApiVersion": 1,
-        "strict": true,
+        "strict": false,
         "credentials": [
             "dist/credentials/OpenAiSdkApi.credentials.js",
             "dist/credentials/GoogleSdkApi.credentials.js",
@@ -40,14 +41,18 @@
             "dist/nodes/JiMaxLLM/JiMaxTextLLM.node.js",
             "dist/nodes/JiMaxLLM/JiMaxObjectLLM.node.js",
             "dist/nodes/JiMaxLLM/JiMaxObjectToolLLM.node.js",
-            "dist/nodes/UpstashSearch/UpstashSearch.node.js"
+            "dist/nodes/UpstashSearch/UpstashSearch.node.js",
+            "dist/nodes/ReservationPdf/ReservationPdf.node.js"
         ]
     },
     "devDependencies": {
         "@n8n/node-cli": "*",
+        "@types/pdfkit": "^0.17.6",
+        "@types/qrcode": "^1.5.6",
         "eslint": "9.39.4",
         "prettier": "3.8.3",
         "release-it": "20.0.1",
+        "sharp": "^0.34.5",
         "typescript": "^6.0.3"
     },
     "peerDependencies": {
@@ -60,6 +65,8 @@
         "@ai-sdk/openai-compatible": "^2.0.45",
         "@upstash/search": "^0.1.7",
         "ai": "^6.0.174",
+        "pdfkit": "^0.19.0",
+        "qrcode": "^1.5.4",
         "zod": "^4.4.2"
     }
 }

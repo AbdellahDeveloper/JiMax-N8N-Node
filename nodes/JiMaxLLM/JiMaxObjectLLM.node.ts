@@ -28,7 +28,7 @@ const messageSchema = z.array(
 export class JiMaxObjectLLM implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'JiMax Object LLM',
-		name: 'jiMaxObjectLLM',
+		name: 'jiMaxObjectLlm',
 		icon: 'fa:robot',
 		group: ['transform'],
 		version: 1,
@@ -168,6 +168,7 @@ export class JiMaxObjectLLM implements INodeType {
 				description: 'If enabled, the memory for this Session ID will be deleted during this run',
 			},
 		],
+		usableAsTool: true,
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {

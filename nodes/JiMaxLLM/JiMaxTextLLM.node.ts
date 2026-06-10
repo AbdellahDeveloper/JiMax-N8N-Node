@@ -29,7 +29,7 @@ const messageSchema = z.array(
 export class JiMaxTextLLM implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'JiMax Text LLM',
-		name: 'jiMaxTextLLM',
+		name: 'jiMaxTextLlm',
 		icon: 'fa:robot',
 		group: ['transform'],
 		version: 1,
@@ -156,6 +156,7 @@ export class JiMaxTextLLM implements INodeType {
 				description: 'Include history in output for debugging',
 			},
 		],
+		usableAsTool: true,
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {

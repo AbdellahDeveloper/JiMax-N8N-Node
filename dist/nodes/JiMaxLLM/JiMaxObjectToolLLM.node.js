@@ -49,7 +49,7 @@ class JiMaxObjectToolLLM {
     constructor() {
         this.description = {
             displayName: 'JiMax Object Tool LLM',
-            name: 'jiMaxObjectToolLLM',
+            name: 'jiMaxObjectToolLlm',
             icon: 'fa:tools',
             group: ['transform'],
             version: 1,
@@ -137,19 +137,33 @@ class JiMaxObjectToolLLM {
                             displayName: 'Tool',
                             values: [
                                 {
-                                    displayName: 'Name',
-                                    name: 'name',
-                                    type: 'string',
-                                    default: '',
-                                    description: 'Unique name of the tool (alphanumeric and underscores only)',
-                                    required: true,
-                                },
-                                {
                                     displayName: 'Description',
                                     name: 'description',
                                     type: 'string',
                                     default: '',
                                     description: 'Describe what the tool does and when the LLM should use it',
+                                    required: true,
+                                },
+                                {
+                                    displayName: 'Include Parent Item Data',
+                                    name: 'includeParentData',
+                                    type: 'boolean',
+                                    default: false,
+                                    description: 'If enabled, the current item data will be passed to the sub-workflow as \'_parentData\'',
+                                },
+                                {
+                                    displayName: 'Input Schema (Zod)',
+                                    name: 'inputSchema',
+                                    type: 'string',
+                                    default: 'z.object({\n		input:	z.string(),\n})',
+                                    description: 'Define the parameters the LLM should pass to this tool. Variable \'z\' is available.',
+                                },
+                                {
+                                    displayName: 'Name',
+                                    name: 'name',
+                                    type: 'string',
+                                    default: '',
+                                    description: 'Unique name of the tool (alphanumeric and underscores only)',
                                     required: true,
                                 },
                                 {
@@ -159,24 +173,6 @@ class JiMaxObjectToolLLM {
                                     default: '',
                                     description: 'The ID of the n8n workflow to trigger',
                                     required: true,
-                                },
-                                {
-                                    displayName: 'Input Schema (Zod)',
-                                    name: 'inputSchema',
-                                    type: 'string',
-                                    typeOptions: {
-                                        rows: 4,
-                                        alwaysOpenEditWindow: true,
-                                    },
-                                    default: 'z.object({\n  input: z.string(),\n})',
-                                    description: 'Define the parameters the LLM should pass to this tool. Variable "z" is available.',
-                                },
-                                {
-                                    displayName: 'Include Parent Item Data',
-                                    name: 'includeParentData',
-                                    type: 'boolean',
-                                    default: false,
-                                    description: 'If enabled, the current item data will be passed to the sub-workflow as "_parentData"',
                                 },
                             ],
                         },
@@ -240,6 +236,7 @@ class JiMaxObjectToolLLM {
                     description: 'Return response immediately without waiting for save',
                 },
             ],
+            usableAsTool: true,
         };
     }
     async execute() {

@@ -50,7 +50,7 @@ class JiMaxTextLLM {
     constructor() {
         this.description = {
             displayName: 'JiMax Text LLM',
-            name: 'jiMaxTextLLM',
+            name: 'jiMaxTextLlm',
             icon: 'fa:robot',
             group: ['transform'],
             version: 1,
@@ -177,6 +177,7 @@ class JiMaxTextLLM {
                     description: 'Include history in output for debugging',
                 },
             ],
+            usableAsTool: true,
         };
     }
     async execute() {

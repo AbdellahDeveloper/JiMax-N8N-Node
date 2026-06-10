@@ -1,4 +1,5 @@
 import {
+	IDataObject,
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
@@ -11,10 +12,11 @@ export class UpstashSearch implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Upstash Search',
 		name: 'upstashSearch',
-		icon: 'fa:search',
+		icon: 'file:upstash.svg',
 		group: ['transform'],
 		version: 1,
 		description: 'Search, Upsert, Fetch and Delete documents in Upstash Search',
+		subtitle: '={{$parameter["operation"]}}',
 		defaults: {
 			name: 'Upstash Search',
 		},
@@ -47,10 +49,10 @@ export class UpstashSearch implements INodeType {
 					},
 				},
 				options: [
-					{ name: 'Search', value: 'search', description: 'Search for documents' },
-					{ name: 'Upsert', value: 'upsert', description: 'Add or update documents' },
-					{ name: 'Fetch', value: 'fetch', description: 'Fetch documents by ID' },
-					{ name: 'Delete', value: 'delete', description: 'Delete documents by ID' },
+					{ name: 'Create or Update', value: 'upsert', description: 'Create a new record, or update the current one if it already exists (upsert)', action: 'Upsert a document' },
+					{ name: 'Delete', value: 'delete', description: 'Delete documents by ID', action: 'Delete a document' },
+					{ name: 'Fetch', value: 'fetch', description: 'Fetch documents by ID', action: 'Fetch a document' },
+					{ name: 'Search', value: 'search', description: 'Search for documents', action: 'Search a document' },
 				],
 				default: 'search',
 				noDataExpression: true,
@@ -79,6 +81,39 @@ export class UpstashSearch implements INodeType {
 				description: 'Text string used to find matching documents',
 			},
 			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['document'],
+						operation: ['search'],
+					},
+				},
+				typeOptions: {
+					minValue: 1,
+				},
+				default: 10,
+				description: 'Max number of results to return',
+			},
+			{
+				displayName: 'Similarity Threshold',
+				name: 'minScore',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['document'],
+						operation: ['search'],
+					},
+				},
+				typeOptions: {
+					minValue: 0,
+					maxValue: 1,
+				},
+				default: 0,
+				description: 'The minimum score a result must have to be returned (0-1 range). 0 means no filtering.',
+			},
+			{
 				displayName: 'Additional Fields',
 				name: 'additionalFields',
 				type: 'collection',
@@ -92,13 +127,6 @@ export class UpstashSearch implements INodeType {
 				},
 				options: [
 					{
-						displayName: 'Limit',
-						name: 'limit',
-						type: 'number',
-						default: 5,
-						description: 'Maximum number of results to retrieve',
-					},
-					{
 						displayName: 'Filter',
 						name: 'filter',
 						type: 'string',
@@ -106,11 +134,25 @@ export class UpstashSearch implements INodeType {
 						description: 'Optional search constraint using either a string expression or structured filter object',
 					},
 					{
+						displayName: 'Input Enrichment',
+						name: 'inputEnrichment',
+						type: 'boolean',
+						default: true,
+						description: 'Whether to enhance queries before searching (enabled by default)',
+					},
+					{
+						displayName: 'Keep Original Query After Enrichment',
+						name: 'keepOriginalQueryAfterEnrichment',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to keep the original query alongside the enriched one (false by default)',
+					},
+					{
 						displayName: 'Reranking',
 						name: 'reranking',
 						type: 'boolean',
 						default: false,
-						description: 'Whether to use enhanced search result reranking',
+						description: 'Whether to use enhanced search result reranking. It will have additional cost when enabled.',
 					},
 					{
 						displayName: 'Semantic Weight',
@@ -118,21 +160,7 @@ export class UpstashSearch implements INodeType {
 						type: 'number',
 						typeOptions: { minValue: 0, maxValue: 1 },
 						default: 0.75,
-						description: 'Relevance balance between semantic and keyword search (0-1)',
-					},
-					{
-						displayName: 'Input Enrichment',
-						name: 'inputEnrichment',
-						type: 'boolean',
-						default: true,
-						description: 'Whether to enhance queries before searching',
-					},
-					{
-						displayName: 'Keep Original Query After Enrichment',
-						name: 'keepOriginalQueryAfterEnrichment',
-						type: 'boolean',
-						default: false,
-						description: 'Whether to keep the original query alongside the enriched one',
+						description: 'Relevance balance between semantic and keyword search (0-1 range). For instance, 0.2 applies 20% semantic matching with 80% full-text matching.',
 					},
 				],
 			},
@@ -148,8 +176,8 @@ export class UpstashSearch implements INodeType {
 					},
 				},
 				options: [
-					{ name: 'Single Document', value: 'single' },
 					{ name: 'Batch (JSON)', value: 'batch' },
+					{ name: 'Single Document', value: 'single' },
 				],
 				default: 'single',
 			},
@@ -228,6 +256,7 @@ export class UpstashSearch implements INodeType {
 				description: 'Comma-separated list of document IDs',
 			},
 		],
+		usableAsTool: true,
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
@@ -247,61 +276,91 @@ export class UpstashSearch implements INodeType {
 
 				if (operation === 'search') {
 					const query = this.getNodeParameter('query', i) as string;
-					const additionalFields = this.getNodeParameter('additionalFields', i) as any;
+					const limit = this.getNodeParameter('limit', i) as number;
+					const minScore = this.getNodeParameter('minScore', i) as number;
+					const additionalFields = this.getNodeParameter('additionalFields', i) as object;
 					const searchResults = await index.search({
 						query,
+						limit,
 						...additionalFields,
 					});
-					
+
+					// Filter results by score if minScore > 0
+					let results = searchResults;
+					if (minScore > 0 && Array.isArray(searchResults)) {
+						results = searchResults.filter(r => (r.score || 0) >= minScore);
+					}
+
 					// Return each result as a separate item if it's an array
-					if (Array.isArray(searchResults)) {
-						for (const result of searchResults) {
-							returnData.push({ json: result as any });
+					if (Array.isArray(results)) {
+						for (const result of results) {
+							returnData.push({
+								json: result as unknown as IDataObject,
+								pairedItem: { item: i },
+							});
 						}
-					} else {
-						returnData.push({ json: searchResults as any });
+					} else if (results) {
+						returnData.push({
+							json: results as unknown as IDataObject,
+							pairedItem: { item: i },
+						});
 					}
 				} else if (operation === 'upsert') {
 					const upsertMode = this.getNodeParameter('upsertMode', i) as string;
-					
+
 					if (upsertMode === 'single') {
 						const id = this.getNodeParameter('id', i) as string;
-						const content = this.getNodeParameter('content', i) as any;
-						const metadata = this.getNodeParameter('metadata', i) as any;
-						
+						const content = this.getNodeParameter('content', i) as IDataObject;
+						const metadata = this.getNodeParameter('metadata', i) as IDataObject;
+
 						const res = await index.upsert({
 							id,
 							content: typeof content === 'string' ? JSON.parse(content) : content,
 							metadata: typeof metadata === 'string' ? JSON.parse(metadata) : (metadata || {}),
 						});
-						returnData.push({ json: { status: res } });
+						returnData.push({
+							json: { status: res },
+							pairedItem: { item: i },
+						});
 					} else {
-						const documentsJson = this.getNodeParameter('documentsJson', i) as any;
+						const documentsJson = this.getNodeParameter('documentsJson', i) as IDataObject[];
 						const docs = typeof documentsJson === 'string' ? JSON.parse(documentsJson) : documentsJson;
-						const res = await index.upsert(docs);
-						returnData.push({ json: { status: res } });
+						const res = await index.upsert(docs as any[]);
+						returnData.push({
+							json: { status: res },
+							pairedItem: { item: i },
+						});
 					}
 				} else if (operation === 'fetch') {
 					const idsRaw = this.getNodeParameter('ids', i) as string;
-					const ids = idsRaw.split(',').map(id => id.trim());
+					const ids = idsRaw.split(',').map((id) => id.trim());
 					const results = await index.fetch(ids);
-					
+
 					if (Array.isArray(results)) {
 						for (const result of results) {
 							if (result) {
-								returnData.push({ json: result as any });
+								returnData.push({
+									json: result as unknown as IDataObject,
+									pairedItem: { item: i },
+								});
 							}
 						}
 					}
 				} else if (operation === 'delete') {
 					const idsRaw = this.getNodeParameter('ids', i) as string;
-					const ids = idsRaw.split(',').map(id => id.trim());
+					const ids = idsRaw.split(',').map((id) => id.trim());
 					const res = await index.delete(ids);
-					returnData.push({ json: res });
+					returnData.push({
+						json: res,
+						pairedItem: { item: i },
+					});
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ json: { error: error.message } });
+					returnData.push({
+						json: { error: (error as Error).message },
+						pairedItem: { item: i },
+					});
 					continue;
 				}
 				throw error;

@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-jimax-llm",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "n8n nodes for LLM interaction using Vercel AI SDK",
   "license": "MIT",
   "homepage": "",
